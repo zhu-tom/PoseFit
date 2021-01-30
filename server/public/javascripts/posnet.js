@@ -12,28 +12,32 @@ let video;
 let poseNet;
 let poses = [];
 
+const ExerciseEnum = Object.freeze({"squats":1, "jj":2, "pushups":3});
+
 function setup() {
   createCanvas(640, 480);
   video = createCapture(VIDEO);
   video.size(width, height);
 
   // Create a new poseNet method with a single detection
-  poseNet = ml5.poseNet(video, modelReady);
+  poseNet = ml5.poseNet(video, 'single', modelReady);
   // This sets up an event that fills the global variable "poses"
   // with an array every time new poses are detected
   poseNet.on("pose", function(results) {
-    poses = results;
+		poses = results;
+
   });
   // Hide the video element, and just show the canvas
   video.hide();
 }
 
 function modelReady() {
-  select("#status").html("Model Loaded");
+	select("#status").html("Model Loaded");
 }
 
 function draw() {
-  image(video, 0, 0, width, height);
+	image(video, 0, 0, width, height);
+	// console.log(poses);
 
   // We can call both functions to draw all keypoints and the skeletons
   drawKeypoints();
@@ -43,9 +47,9 @@ function draw() {
 // A function to draw ellipses over the detected keypoints
 function drawKeypoints() {
   // Loop through all the poses detected
-  for (let i = 0; i < poses.length; i += 1) {
+  if(poses.length > 0) {
     // For each pose detected, loop through all the keypoints
-    const pose = poses[i].pose;
+    const pose = poses[0].pose;
     for (let j = 0; j < pose.keypoints.length; j += 1) {
       // A keypoint is an object describing a body part (like rightArm or leftShoulder)
       const keypoint = pose.keypoints[j];
@@ -62,8 +66,8 @@ function drawKeypoints() {
 // A function to draw the skeletons
 function drawSkeleton() {
   // Loop through all the skeletons detected
-  for (let i = 0; i < poses.length; i += 1) {
-    const skeleton = poses[i].skeleton;
+  if(poses.length > 0) {
+    const skeleton = poses[0].skeleton;
     // For every skeleton, loop through all body connections
     for (let j = 0; j < skeleton.length; j += 1) {
       const partA = skeleton[j][0];
@@ -72,4 +76,129 @@ function drawSkeleton() {
       line(partA.position.x, partA.position.y, partB.position.x, partB.position.y);
     }
   }
+}
+
+async function getStartPose(ex){
+	let ready = false;
+	let curPose;
+	let startPose;
+
+	if(ex == ExerciseEnum.squats){
+		console.log("Get in position and raise your right hand above your head to begin.");
+
+		// while(!ready){
+			// if(poses.length > 0 && poses[0].pose.keypoints.length == 17){
+			// 	curPose = poses[0].pose;
+			// 	if(curPose.rightWrist.y < curPose.nose.y){
+			// 		ready = true;
+			// 	}
+			// } else{
+			// 	console.log("Error, cannot detect pose.");
+			// }
+		// }
+		await new Promise((resolve, reject) => {
+			let readyLoop = setInterval(() => {
+				if(poses.length > 0 && poses[0].pose.score > 0.25 && poses[0].pose.keypoints.length == 17){
+					curPose = poses[0].pose;
+					if(curPose.rightWrist.y < curPose.nose.y && curPose.score > 0.2){
+						ready = true;
+					}
+				} else{
+					console.log("Error, cannot detect pose.");
+				}
+	
+				if(ready){
+					resolve(true);
+					clearInterval(readyLoop);
+				}
+			}, 100);
+		});
+
+		console.log("Get ready, starting timer in...");
+		console.log(3);
+		let i = 0;
+		let promise = new Promise((resolve, reject) => {
+			let countdown = setInterval(() => {
+				if(i < 2){
+					console.log(2-i);
+				} else{
+					console.log("GO!");
+					resolve(startPose);
+					clearInterval(countdown);
+				}
+	
+				if(i == 1){
+					startPose = poses[0].pose;
+				}
+	
+				i += 1;
+			}, 1000);
+		})
+
+		return promise;
+	} else{
+		return null;
+	}
+}
+
+async function startExercise() {
+	let count = 0;
+	let refPose = await getStartPose(ExerciseEnum.squats);
+	console.log(refPose);
+	let top = true;
+
+	let endTime = new Date();
+	endTime.setSeconds(endTime.getSeconds() + 120);
+	// console.log(endTime);
+
+	console.log(count);
+	let countdown = setInterval(() => {
+		if(Date.now() < endTime){ 
+			half = trackReps(refPose, top);
+
+			if(half == true){
+				top = !top;
+				if(top == true){
+					count += 1;
+					console.log(count);
+				}
+			}
+		} else{ 
+			console.log("Times up!");
+			clearInterval(countdown);
+		} 
+	}, 100);
+}
+
+function trackReps(refPose, top){
+	if(poses.length > 0 && poses[0].pose.score > 0.25){
+		const curPose = poses[0].pose;
+
+		if(top){
+			let lDiff = refPose.leftKnee.y * 0.10;
+			let rDiff = refPose.rightKnee.y * 0.10;
+
+			//Assumes knees don't move vertically during reps
+			if(curPose.leftHip.y >= lDiff + refPose.leftKnee.y &&
+				 curPose.rightHip.y >= rDiff + refPose.rightKnee.y){
+				return true;
+			}
+			else{
+				return false;
+			}
+		} else{
+			let lDiff = refPose.leftHip.y * 0.05;
+			let rDiff = refPose.rightHip.y * 0.05;
+
+			if(curPose.leftHip.y <= lDiff + refPose.leftHip.y &&
+				 curPose.rightHip.y <= rDiff + refPose.rightHip.y){
+			 return true;
+		 }
+		 else{
+			 return false;
+		 }
+		}
+	} else{
+		console.log("Error, cannot detect pose.");
+	}
 }
