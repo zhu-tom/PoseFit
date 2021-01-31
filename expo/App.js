@@ -34,6 +34,15 @@ import ExerciseScreen from './components/ExerciseScreen';
 import AnalysisScreen from './components/AnalysisScreen';
 import * as Permissions from 'expo-permissions';
 
+import * as firebase from 'firebase';
+import WelcomeScreen from './components/WelcomeScreen';
+import { AuthProvider } from './firebase/context';
+
+firebase.auth().onAuthStateChanged(user => {
+  if (user !== null) {
+    console.log("authenticated")
+  }
+});
 
 const Stack = createStackNavigator();
 
@@ -49,26 +58,35 @@ const App = () => {
     );
   }
   return (
-    <SafeAreaView style={styles.container}>
-      <NavigationContainer> 
-        <Stack.Navigator>
-          <Stack.Screen
-            name="Home"
-            component={HomeScreen}
-            options={{title: "Home"}}
-          />
-          <Stack.Screen
-            name="Exercise"
-            component={ExerciseScreen}
-          />
-          <Stack.Screen
-            name="Analysis"
-            component={AnalysisScreen}
-          />
-        </Stack.Navigator>
-      </NavigationContainer>
-    </SafeAreaView>
-    
+    <AuthProvider>
+      <SafeAreaView style={styles.container}>
+          <NavigationContainer> 
+            <Stack.Navigator>
+              <Stack.Screen
+                name="Welcome"
+                component={WelcomeScreen}
+              />
+              <Stack.Screen
+              />
+            </Stack.Navigator>
+            <Stack.Navigator>
+              <Stack.Screen
+                name="Home"
+                component={HomeScreen}
+                options={{title: "Home"}}
+              />
+              <Stack.Screen
+                name="Exercise"
+                component={ExerciseScreen}
+              />
+              <Stack.Screen
+                name="Analysis"
+                component={AnalysisScreen}
+              />
+            </Stack.Navigator>
+          </NavigationContainer>
+        </SafeAreaView>
+    </AuthProvider>
   );
 };
 

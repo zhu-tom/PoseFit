@@ -4,6 +4,7 @@ import * as tf from '@tensorflow/tfjs';
 import * as posenet from '@tensorflow-models/posenet';
 import { cameraWithTensors } from '@tensorflow/tfjs-react-native';
 import { StyleSheet, View, Text, Button, Dimensions } from 'react-native';
+import { startExercise } from '../analyzers';
 
 const TensorCamera = cameraWithTensors(Camera);
 const scaleFactor = 0.50;
@@ -21,9 +22,12 @@ const convertToMl5 = (data) => {
   return data;
 }
 
-const AnalysisScreen = ({navigation}) => {
+const AnalysisScreen = ({navigation, route}) => {
   const [tfReady, setTfReady] = React.useState(false);
   const [net, setNet] = React.useState(null);
+  const [userReady, setUserReady] = React.useState(false);
+  const [count, setCount] = React.useState(0);
+  const [timeUp, setTimeUp] = React.useState(false);
 
   React.useEffect(() => {
     const waitForTf = async () => {
@@ -36,6 +40,7 @@ const AnalysisScreen = ({navigation}) => {
       });
       setTfReady(true);
       setNet(thenet);
+      startExercise(route.params.id, setCount, setUserReady, setTimeUp);
     }
     waitForTf();
   }, [])
@@ -82,6 +87,7 @@ const AnalysisScreen = ({navigation}) => {
   }
 
   return <View>
+    <Text style={styles.score}>Count: {count}</Text>
     <TensorCamera
     // Standard Camera props
     style={styles.camera}
@@ -111,6 +117,11 @@ const styles = StyleSheet.create({
     flex: 1,
     height: '100%',
     width: '100%'
+  },
+  score: {
+    position: "absolute",
+    top: 0,
+    left: 0,
   }
 });
 

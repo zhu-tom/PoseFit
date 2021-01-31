@@ -7,12 +7,12 @@ import Icon from '@expo/vector-icons/AntDesign'
 const DATA = [
   {
     id: 1,
-    name: "Jumping Jacks",
+    name: "Squats",
     img: "",
   },
   {
     id: 2,
-    name: "Squats",
+    name: "Pushups",
     img: ""
   }
 ];
