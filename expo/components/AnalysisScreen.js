@@ -30,6 +30,8 @@ const getStartPose = async (ex, images, net) => {
 	if(ex == ExerciseEnum["Squats"]){
 		await new Promise((resolve, reject) => {
 		// 	let cntdn = setInterval(async () => { 
+			console.log("Get in position and raise your right hand above your head to begin.");
+			
 			requestAnimationFrame(async function initLoop(){
 				const nextImageTensor = images.next().value;
 				nextImageTensor.height = nextImageTensor.shape[0];
