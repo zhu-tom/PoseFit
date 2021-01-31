@@ -94,10 +94,7 @@ const AnalysisScreen = ({navigation, route}) => {
   };
   }
 
-  const count = 0;
-
   return <View>
-    <Text style={styles.score}>Count: {tfReady ? "Yes": "No"}</Text>
     <TensorCamera
     // Standard Camera props
     style={styles.camera}
@@ -120,8 +117,8 @@ const {height, width} = Dimensions.get("window");
 const styles = StyleSheet.create({
   camera: {
     zIndex: 1,
-    width: 350,
-    height: 600,
+    width,
+    height,
   },
   cameraView: {
     flex: 1,
