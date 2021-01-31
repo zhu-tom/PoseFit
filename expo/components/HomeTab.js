@@ -1,6 +1,5 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import { NavigationContainer } from '@react-navigation/native';
 
 import HomeScreen from './HomeScreen';
 import ExerciseScreen from './ExerciseScreen';
@@ -10,7 +9,6 @@ const Stack = createStackNavigator();
 
 const HomeTab = () => {
   return (
-    <NavigationContainer>
       <Stack.Navigator>
         <Stack.Screen
           name="Home"
@@ -26,7 +24,6 @@ const HomeTab = () => {
           component={AnalysisScreen}
         />
       </Stack.Navigator>
-    </NavigationContainer>
   )
 }
 

@@ -40,6 +40,8 @@ import LoginScreen from './components/LoginScreen';
 import HomeTab from './components/HomeTab';
 import ProfileTab from './components/ProfileTab';
 
+import {Ionicons} from '@expo/vector-icons';
+
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
@@ -81,7 +83,22 @@ const App = () => {
                 </Stack.Navigator>
               ) :
               (
-                <Tab.Navigator>
+                <Tab.Navigator 
+                  screenOptions={({route}) => {
+                    return ({
+                      tabBarIcon: ({focused, color, size}) => {
+                        let iconName;
+
+                        if (route.name == "Home") {
+                          iconName = focused ? 'home' : 'home-outline'
+                        } else if (route.name == "Profile") {
+                          iconName = focused ? 'person' : 'person-outline'
+                        }
+
+                        return <Ionicons name={iconName} size={size} color={color}/>
+                      }
+                    })
+                }}>
                   <Tab.Screen name="Home" component={HomeTab}/>
                   <Tab.Screen name="Profile" component={ProfileTab}/>
                 </Tab.Navigator>

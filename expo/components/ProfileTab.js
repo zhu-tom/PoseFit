@@ -1,12 +1,18 @@
+import { createStackNavigator } from '@react-navigation/stack';
 import React from 'react';
-import { Text, View } from 'react-native';
-import { auth } from '../firebase/firebase';
+
+import ProfileScreen from './ProfileScreen';
+
+const Stack = createStackNavigator();
 
 const ProfileTab = () => {
   return (
-    <View>
-      <Text>{auth.currentUser.email}</Text>
-    </View>
+    <Stack.Navigator>
+      <Stack.Screen 
+        name="Profile" 
+        options={{title: "Profile"}} 
+        component={ProfileScreen}/>
+    </Stack.Navigator>
   );
 }
 
