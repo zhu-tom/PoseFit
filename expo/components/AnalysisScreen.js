@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Camera } from 'expo-camera';
 import * as tf from '@tensorflow/tfjs';
 import * as posenet from '@tensorflow-models/posenet';
@@ -23,6 +23,7 @@ const convertToMl5 = (data) => {
   return data;
 }
 
+// <<<<<<< HEAD
 const getStartPose = async (ex, images, net) => {
 	let ready = false;
 	let startPose;
@@ -132,26 +133,30 @@ const squatReps = (refPose, curPose, top) => {
 	}
 }
 
+
 const AnalysisScreen = ({navigation, route}) => {
   const [tfReady, setTfReady] = React.useState(false);
-  const [net, setNet] = React.useState(null);
+  //const [net, setNet] = React.useState(null);
 
   React.useEffect(() => {
+    console.log("effect");
     const waitForTf = async () => {
       await tf.ready();
-      const thenet = await posenet.load({
-        architecture: 'MobileNetV1',
-        outputStride,
-        inputResolution: {height: 600, width: 350},
-        multiplier: 0.75,
-      });
+      // const thenet = await posenet.load({
+      //   architecture: 'MobileNetV1',
+      //   outputStride,
+      //   inputResolution: {height: 600, width: 350},
+      //   multiplier: 0.75,
+      // });
       setTfReady(true);
-      setNet(thenet);
+      //setNet(thenet);
+      console.log("all ready")
     }
     waitForTf();
   }, []);
 
   const handleCameraStream = async (images, updatePreview, gl) => {
+// <<<<<<< HEAD
     // const loop = async () => {
       if (tfReady && net !== null) {
 				let ex = route.params.ex;
@@ -202,6 +207,40 @@ const AnalysisScreen = ({navigation, route}) => {
     // }
     // loop();
   }
+// =======
+//     const net = await posenet.load({
+//       architecture: 'MobileNetV1',
+//       outputStride,
+//       inputResolution: {height: 600, width: 350},
+//       multiplier: 0.75,
+//     });
+//     const loop = async () => {
+//       const nextImageTensor = images.next().value;
+//       if (nextImageTensor.shape) {
+//         nextImageTensor.height = nextImageTensor.shape[0];
+//         //console.log(nextImageTensor.shape);
+//         nextImageTensor.width = nextImageTensor.shape[1];
+//         try {
+//           const pose = await net.estimateSinglePose(nextImageTensor, scaleFactor, flipHorizontal, outputStride);
+//           console.log(pose && convertToMl5(pose));
+
+//         } catch {
+//           console.log("error");
+//         }
+//       }
+//       //
+//       // do something with tensor here
+//       //
+
+//       // if autorender is false you need the following two lines.
+//       // updatePreview();
+//       // gl.endFrameEXP();
+    
+//       requestAnimationFrame(loop);
+//     }
+//     loop();
+// }
+// >>>>>>> 7c9151e71e3b90aa22321ff3d987b11b7b53ae52
 
 
   // Currently expo does not support automatically determining the
@@ -221,7 +260,10 @@ const AnalysisScreen = ({navigation, route}) => {
   };
   }
 
+  const count = 0;
+
   return <View>
+    <Text style={styles.score}>Count: {tfReady ? "Yes": "No"}</Text>
     <TensorCamera
     // Standard Camera props
     style={styles.camera}
@@ -251,6 +293,10 @@ const styles = StyleSheet.create({
     flex: 1,
     height: '100%',
     width: '100%'
+  },
+  score: {
+    zIndex: 2,
+    fontSize: 50,
   }
 });
 

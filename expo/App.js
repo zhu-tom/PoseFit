@@ -6,7 +6,7 @@
  * @flow strict-local
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -29,15 +29,24 @@ import 'react-native-gesture-handler';
 import {NavigationContainer} from '@react-navigation/native';
 import '@react-navigation/native/'
 import {createStackNavigator} from '@react-navigation/stack';
-import HomeScreen from './components/HomeScreen';
-import ExerciseScreen from './components/ExerciseScreen';
-import AnalysisScreen from './components/AnalysisScreen';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+
 import * as Permissions from 'expo-permissions';
 
+import WelcomeScreen from './components/WelcomeScreen';
+import { AuthContext, AuthProvider } from './firebase/context';
+import SignupScreen from './components/SignupScreen';
+import LoginScreen from './components/LoginScreen';
+import HomeTab from './components/HomeTab';
+import ProfileTab from './components/ProfileTab';
 
 const Stack = createStackNavigator();
+const Tab = createBottomTabNavigator();
 
 const App = () => {
+  const { user } = useContext(AuthContext);
+  console.log(user);
+
   const [permission, askForPermission] = Permissions.usePermissions(Permissions.CAMERA, { ask: true});
 
   if (!permission || permission.status !== 'granted') {
@@ -48,27 +57,38 @@ const App = () => {
       </View>
     );
   }
+
+
   return (
-    <SafeAreaView style={styles.container}>
-      <NavigationContainer> 
-        <Stack.Navigator>
-          <Stack.Screen
-            name="Home"
-            component={HomeScreen}
-            options={{title: "Home"}}
-          />
-          <Stack.Screen
-            name="Exercise"
-            component={ExerciseScreen}
-          />
-          <Stack.Screen
-            name="Analysis"
-            component={AnalysisScreen}
-          />
-        </Stack.Navigator>
-      </NavigationContainer>
-    </SafeAreaView>
-    
+    <AuthProvider>
+      <SafeAreaView style={styles.container}>
+          <NavigationContainer>
+            {user === null ? 
+              (
+                <Stack.Navigator>
+                  <Stack.Screen
+                    name="Welcome"
+                    component={WelcomeScreen}
+                  />
+                  <Stack.Screen
+                    name="Signup"
+                    component={SignupScreen}
+                  />
+                  <Stack.Screen
+                    name="Login"
+                    component={LoginScreen}
+                  />
+                </Stack.Navigator>
+              ) :
+              (
+                <Tab.Navigator>
+                  <Tab.Screen name="Home" component={HomeTab}/>
+                  <Tab.Screen name="Profile" component={ProfileTab}/>
+                </Tab.Navigator>
+              )}  
+          </NavigationContainer>
+        </SafeAreaView>
+    </AuthProvider>
   );
 };
 
