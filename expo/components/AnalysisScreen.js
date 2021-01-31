@@ -138,6 +138,7 @@ const AnalysisScreen = ({navigation, route}) => {
   const [tfReady, setTfReady] = React.useState(false);
   //const [net, setNet] = React.useState(null);
   const [isRep, setIsRep] = React.useState(false);
+  const [score, setScore] = React.useState(0);
 
   React.useEffect(() => {
     console.log("effect");
@@ -199,6 +200,7 @@ const AnalysisScreen = ({navigation, route}) => {
 							top = !top;
 							if(top == true){
                 count += 1;
+                setScore(score + 1);
                 setIsRep(true);
                 setTimeout(() => {
                   setIsRep(false);
@@ -245,8 +247,15 @@ const AnalysisScreen = ({navigation, route}) => {
     borderWidth: 5,
     height,
     width,
-    display: isRep ? "flex" : "none"
+    opacity: isRep ? 100 : 0
   }}></View>
+  <Text style={{
+    position: 'absolute',
+    zIndex: 100000,
+    fontSize: 50,
+    top: 5,
+    left: 5,
+  }}>Count: {score}</Text>
     <TensorCamera
     // Standard Camera props
     style={styles.camera}
