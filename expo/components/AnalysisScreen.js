@@ -200,7 +200,7 @@ const AnalysisScreen = ({navigation, route}) => {
 							top = !top;
 							if(top == true){
                 count += 1;
-                setScore(score + 1);
+                setScore(count);
                 setIsRep(true);
                 setTimeout(() => {
                   setIsRep(false);
