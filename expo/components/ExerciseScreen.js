@@ -1,16 +1,17 @@
 import React from 'react';
+import { Button, Image, StyleSheet, Text, View } from 'react-native';
 import {ExerciseEnum} from '../enum';
-import { Button, StyleSheet, Text, View } from 'react-native';
 
 
 const ExerciseScreen = ({navigation, route}) => {
-  const {name, img, id} = route.params;
-	
+  const {name, gif, info, id} = route.params;
+  
   return (
     <View style={styles.container}>
+      <Image source={gif} style={{height: 200, width: '100%'}}/>
       <View style={{width: '100%', padding: 20, display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
         <Text style={styles.title}>{name}</Text>
-
+        <Text>{info}</Text>
       </View>
       <View style={{height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
         <Button
