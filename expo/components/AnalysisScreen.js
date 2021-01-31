@@ -22,42 +22,45 @@ const convertToMl5 = (data) => {
 }
 
 const AnalysisScreen = ({navigation}) => {
-  
-
   const [tfReady, setTfReady] = React.useState(false);
   const [net, setNet] = React.useState(null);
 
   React.useEffect(() => {
     const waitForTf = async () => {
       await tf.ready();
-      const net = await posenet.load({
+      const thenet = await posenet.load({
         architecture: 'MobileNetV1',
         outputStride,
-        inputResolution: 257,
+        inputResolution: {height: 600, width: 350},
         multiplier: 0.75,
       });
       setTfReady(true);
-      setNet(net);
+      setNet(thenet);
     }
     waitForTf();
   }, [])
 
   const handleCameraStream = (images, updatePreview, gl) => {
     const loop = async () => {
-      const nextImageTensor = images.next().value
-      
-      const pose = await net.estimateSinglePose(nextImageTensor, scaleFactor, flipHorizontal, outputStride);
-      console.log(convertToMl5(pose));
-      //
-      // do something with tensor here
-      //
-
-      // if autorender is false you need the following two lines.
-      // updatePreview();
-      // gl.endFrameEXP();
-      requestAnimationFrame(loop);
+      if (tfReady && net !== null) {
+        const nextImageTensor = images.next().value;
+        nextImageTensor.height = nextImageTensor.shape[0];
+        console.log(nextImageTensor.shape);
+        nextImageTensor.width = nextImageTensor.shape[1];
+        
+        const pose = await net.estimateSinglePose(nextImageTensor, scaleFactor, flipHorizontal, outputStride);
+        //console.log(convertToMl5(pose));
+        //
+        // do something with tensor here
+        //
+  
+        // if autorender is false you need the following two lines.
+        // updatePreview();
+        // gl.endFrameEXP();
+        requestAnimationFrame(loop);
+      }
     }
-    if (tfReady && net !== null) loop();
+    loop();
   }
 
 
@@ -102,7 +105,7 @@ const styles = StyleSheet.create({
   camera: {
     zIndex: 1,
     width: 350,
-    height: '100%',
+    height: 600,
   },
   cameraView: {
     flex: 1,
