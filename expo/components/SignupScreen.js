@@ -1,6 +1,6 @@
 import React from 'react';
-import { TextInput, Button, View } from 'react-native';
-import * as firebase from 'firebase';
+import { TextInput, Button, View, StyleSheet, Alert } from 'react-native';
+import { auth, database } from '../firebase/firebase';
 
 const SignupScreen = () => {
   const [username, setUsername] = React.useState("");
@@ -8,12 +8,23 @@ const SignupScreen = () => {
   const [password, setPassword] = React.useState("");
 
   const handleSignUp = () => {
-    firebase.auth().createUserWithEmailAndPassword(email, password)
+    console.log('clicked');
+    auth.createUserWithEmailAndPassword(email, password)
       .then(res => {
-        res.user.
+        database.ref().child(`users/${res.user.uid}`).set({
+          username,
+        });
+        console.log(res.user.uid);
       })
-      .catch(res => {
-
+      .catch(err => {
+        Alert.alert(
+          "Error",
+          err.message,
+          [
+            { text: "OK", onPress: () => console.log("OK Pressed") }
+          ],
+          { cancelable: true }
+        );
       });
   }
 
@@ -21,15 +32,18 @@ const SignupScreen = () => {
     <View>
       <TextInput
         placeholder="Username"
+        style={styles.input}
         value={username}
         onChangeText={(text) => setUsername(text)}
       />
       <TextInput
+        style={styles.input}
         placeholder="Email"
         value={email}
         onChangeText={(text) => setEmail(text)}
       />
       <TextInput
+        style={styles.input}
         placeholder="Password"
         secureTextEntry
         value={password}
@@ -39,5 +53,13 @@ const SignupScreen = () => {
     </View> 
   )
 }
+
+const styles = StyleSheet.create({
+  input: {
+    height: 50,
+    padding: 5,
+    fontSize: 20
+  }
+})
 
 export default SignupScreen;

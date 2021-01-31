@@ -1,13 +1,13 @@
 import React from 'react';
 import { Button, TextInput, View } from 'react-native';
-import * as firebase from 'firebase';
+import { auth } from '../firebase/firebase';
 
 const LoginScreen = () => {
   const [username, setUsername] = React.useState("");
   const [password, setPassword] = React.useState("");
 
   const handleLogin = () => {
-    firebase.auth().signInWithEmailAndPassword(username, password)
+    auth.signInWithEmailAndPassword(username, password)
       .then(res => console.log(res))
       .catch(err => console.log(err));
   }

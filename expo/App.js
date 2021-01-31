@@ -6,7 +6,7 @@
  * @flow strict-local
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -34,19 +34,18 @@ import ExerciseScreen from './components/ExerciseScreen';
 import AnalysisScreen from './components/AnalysisScreen';
 import * as Permissions from 'expo-permissions';
 
-import * as firebase from 'firebase';
 import WelcomeScreen from './components/WelcomeScreen';
-import { AuthProvider } from './firebase/context';
-
-firebase.auth().onAuthStateChanged(user => {
-  if (user !== null) {
-    console.log("authenticated")
-  }
-});
+import { AuthContext, AuthProvider } from './firebase/context';
+import SignupScreen from './components/SignupScreen';
+import LoginScreen from './components/LoginScreen';
 
 const Stack = createStackNavigator();
 
+
 const App = () => {
+  const { user } = useContext(AuthContext);
+  console.log(user);
+
   const [permission, askForPermission] = Permissions.usePermissions(Permissions.CAMERA, { ask: true});
 
   if (!permission || permission.status !== 'granted') {
@@ -57,33 +56,46 @@ const App = () => {
       </View>
     );
   }
+
+
   return (
     <AuthProvider>
       <SafeAreaView style={styles.container}>
-          <NavigationContainer> 
-            <Stack.Navigator>
-              <Stack.Screen
-                name="Welcome"
-                component={WelcomeScreen}
-              />
-              <Stack.Screen
-              />
-            </Stack.Navigator>
-            <Stack.Navigator>
-              <Stack.Screen
-                name="Home"
-                component={HomeScreen}
-                options={{title: "Home"}}
-              />
-              <Stack.Screen
-                name="Exercise"
-                component={ExerciseScreen}
-              />
-              <Stack.Screen
-                name="Analysis"
-                component={AnalysisScreen}
-              />
-            </Stack.Navigator>
+          <NavigationContainer>
+            {user === null ? 
+              (
+                <Stack.Navigator>
+                  <Stack.Screen
+                    name="Welcome"
+                    component={WelcomeScreen}
+                  />
+                  <Stack.Screen
+                    name="Signup"
+                    component={SignupScreen}
+                  />
+                  <Stack.Screen
+                    name="Login"
+                    component={LoginScreen}
+                  />
+                </Stack.Navigator>
+              ) :
+              (
+                <Stack.Navigator>
+                  <Stack.Screen
+                    name="Home"
+                    component={HomeScreen}
+                    options={{title: "Home"}}
+                  />
+                  <Stack.Screen
+                    name="Exercise"
+                    component={ExerciseScreen}
+                  />
+                  <Stack.Screen
+                    name="Analysis"
+                    component={AnalysisScreen}
+                  />
+                </Stack.Navigator>
+              )}  
           </NavigationContainer>
         </SafeAreaView>
     </AuthProvider>
