@@ -23,7 +23,6 @@ const convertToMl5 = (data) => {
   return data;
 }
 
-// <<<<<<< HEAD
 const getStartPose = async (ex, images, net) => {
 	let ready = false;
 	let startPose;
@@ -99,8 +98,8 @@ const getStartPose = async (ex, images, net) => {
 
 const squatReps = (refPose, curPose, top) => {
 	if(curPose.score > 0.75){
-		let diff = Math.abs(curPose.rightShoulder.x - curPose.leftShoulder.x) * 0.20;
-		if(Math.abs(curPose.rightAnkle.x - curPose.leftAnkle.x) >= Math.abs(curPose.rightShoulder.x - curPose.leftShoulder.x) - diff){
+		// let diff = Math.abs(curPose.rightShoulder.x - curPose.leftShoulder.x) * 0.20;
+		// if(Math.abs(curPose.rightAnkle.x - curPose.leftAnkle.x) >= Math.abs(curPose.rightShoulder.x - curPose.leftShoulder.x) - diff){
 			if(top){
 				let lDiff = curPose.leftKnee.y * 0.10;
 				let rDiff = curPose.rightKnee.y * 0.10;
@@ -123,16 +122,15 @@ const squatReps = (refPose, curPose, top) => {
 					return false;
 				}
 			}
-		} else{
-			console.log("Your feet are too close together.");
-			return false;
-		}
+		// } else{
+		// 	console.log("Your feet are too close together.");
+		// 	return false;
+		// }
 	} else{
 		console.log("Error, cannot detect pose.");
 		return false;
 	}
 }
-
 
 const AnalysisScreen = ({navigation, route}) => {
   const [tfReady, setTfReady] = React.useState(false);
@@ -156,8 +154,14 @@ const AnalysisScreen = ({navigation, route}) => {
   }, []);
 
   const handleCameraStream = async (images, updatePreview, gl) => {
-// <<<<<<< HEAD
     // const loop = async () => {
+			const net = await posenet.load({
+				architecture: 'MobileNetV1',
+				outputStride,
+				inputResolution: {height: 600, width: 350},
+				multiplier: 0.75,
+			});
+
       if (tfReady && net !== null) {
 				let ex = route.params.ex;
 				let count = 0;
@@ -207,40 +211,6 @@ const AnalysisScreen = ({navigation, route}) => {
     // }
     // loop();
   }
-// =======
-//     const net = await posenet.load({
-//       architecture: 'MobileNetV1',
-//       outputStride,
-//       inputResolution: {height: 600, width: 350},
-//       multiplier: 0.75,
-//     });
-//     const loop = async () => {
-//       const nextImageTensor = images.next().value;
-//       if (nextImageTensor.shape) {
-//         nextImageTensor.height = nextImageTensor.shape[0];
-//         //console.log(nextImageTensor.shape);
-//         nextImageTensor.width = nextImageTensor.shape[1];
-//         try {
-//           const pose = await net.estimateSinglePose(nextImageTensor, scaleFactor, flipHorizontal, outputStride);
-//           console.log(pose && convertToMl5(pose));
-
-//         } catch {
-//           console.log("error");
-//         }
-//       }
-//       //
-//       // do something with tensor here
-//       //
-
-//       // if autorender is false you need the following two lines.
-//       // updatePreview();
-//       // gl.endFrameEXP();
-    
-//       requestAnimationFrame(loop);
-//     }
-//     loop();
-// }
-// >>>>>>> 7c9151e71e3b90aa22321ff3d987b11b7b53ae52
 
 
   // Currently expo does not support automatically determining the
