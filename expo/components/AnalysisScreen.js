@@ -176,7 +176,7 @@ const AnalysisScreen = ({navigation, route}) => {
 				let half;
 
 				let endTime = new Date();
-				endTime.setSeconds(endTime.getSeconds() + 60);
+				endTime.setSeconds(endTime.getSeconds() + 30);
 				// console.log(endTime);
 
 				console.log(count);
