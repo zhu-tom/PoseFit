@@ -11,7 +11,6 @@ const flipHorizontal = false;
 const outputStride = 16;
 
 const convertToMl5 = (data) => {
-  console.log('here');
   data.keypoints.forEach(item => {
     data[item.part] = {
       x: item.position.x,
@@ -31,7 +30,12 @@ const AnalysisScreen = ({navigation}) => {
   React.useEffect(() => {
     const waitForTf = async () => {
       await tf.ready();
-      const net = await posenet.load();
+      const net = await posenet.load({
+        architecture: 'MobileNetV1',
+        outputStride,
+        inputResolution: 257,
+        multiplier: 0.75,
+      });
       setTfReady(true);
       setNet(net);
     }
@@ -97,8 +101,8 @@ const {height, width} = Dimensions.get("window");
 const styles = StyleSheet.create({
   camera: {
     zIndex: 1,
-    width: width,
-    height: height,
+    width: 350,
+    height: '100%',
   },
   cameraView: {
     flex: 1,
