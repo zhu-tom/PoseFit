@@ -137,6 +137,7 @@ const squatReps = (refPose, curPose, top) => {
 const AnalysisScreen = ({navigation, route}) => {
   const [tfReady, setTfReady] = React.useState(false);
   //const [net, setNet] = React.useState(null);
+  const [isRep, setIsRep] = React.useState(false);
 
   React.useEffect(() => {
     console.log("effect");
@@ -197,7 +198,11 @@ const AnalysisScreen = ({navigation, route}) => {
 							// console.log("hey");
 							top = !top;
 							if(top == true){
-								count += 1;
+                count += 1;
+                setIsRep(true);
+                setTimeout(() => {
+                  setIsRep(false);
+                }, 1000);
 								console.log(count);
 							}
 						}
@@ -232,7 +237,16 @@ const AnalysisScreen = ({navigation, route}) => {
   };
   }
 
-  return <View>
+  return <View style={styles.cameraView}>
+    <View style={{
+    position: 'absolute',
+    zIndex: 10000,
+    borderColor: 'green',
+    borderWidth: 5,
+    height,
+    width,
+    display: isRep ? "flex" : "none"
+  }}></View>
     <TensorCamera
     // Standard Camera props
     style={styles.camera}
@@ -264,8 +278,12 @@ const styles = StyleSheet.create({
     width: '100%'
   },
   score: {
-    zIndex: 2,
-    fontSize: 50,
+    position: 'absolute',
+    zIndex: 10000,
+    borderColor: 'green',
+    borderWidth: 5,
+    height,
+    width
   }
 });
 
