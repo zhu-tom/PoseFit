@@ -176,7 +176,7 @@ const AnalysisScreen = ({navigation, route}) => {
 				let half;
 
 				let endTime = new Date();
-				endTime.setSeconds(endTime.getSeconds() + 60);
+				endTime.setSeconds(endTime.getSeconds() + 30);
 				// console.log(endTime);
 
 				console.log(count);
@@ -200,7 +200,7 @@ const AnalysisScreen = ({navigation, route}) => {
 							top = !top;
 							if(top == true){
                 count += 1;
-                setScore(score + 1);
+                setScore(count);
                 setIsRep(true);
                 setTimeout(() => {
                   setIsRep(false);
