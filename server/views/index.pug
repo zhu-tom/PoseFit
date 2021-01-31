@@ -4,5 +4,5 @@ block content
   h1= title
   p Welcome to #{title}
   span(id="status")
-  button(type="button" onclick="startExercise()") squat
+  button(type="button" onclick="startExercise(" + ExerciseEnum.squats + ")") squat
   script(src="javascripts/posnet.js")

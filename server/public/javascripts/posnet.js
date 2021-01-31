@@ -32,7 +32,7 @@ function setup() {
 }
 
 function modelReady() {
-	select("#status").html("Model Loaded");
+	// select("#status").html("Model Loaded");
 }
 
 function draw() {
@@ -86,22 +86,16 @@ async function getStartPose(ex){
 	if(ex == ExerciseEnum.squats){
 		console.log("Get in position and raise your right hand above your head to begin.");
 
-		// while(!ready){
-			// if(poses.length > 0 && poses[0].pose.keypoints.length == 17){
-			// 	curPose = poses[0].pose;
-			// 	if(curPose.rightWrist.y < curPose.nose.y){
-			// 		ready = true;
-			// 	}
-			// } else{
-			// 	console.log("Error, cannot detect pose.");
-			// }
-		// }
 		await new Promise((resolve, reject) => {
 			let readyLoop = setInterval(() => {
-				if(poses.length > 0 && poses[0].pose.score > 0.25 && poses[0].pose.keypoints.length == 17){
+				if(poses.length > 0 && poses[0].pose.score > 0.50 && poses[0].pose.keypoints.length == 17){
 					curPose = poses[0].pose;
-					if(curPose.rightWrist.y < curPose.nose.y && curPose.score > 0.2){
-						ready = true;
+					if(Math.abs(curPose.rightAnkle.x - curPose.leftAnkle.x) >= Math.abs(curPose.rightShoulder.x - curPose.leftShoulder.x)){
+						if(curPose.rightWrist.y < curPose.nose.y && curPose.score > 0.2){
+							ready = true;
+						}
+					} else{
+						console.log("Your feet must be shoulder width apart.");
 					}
 				} else{
 					console.log("Error, cannot detect pose.");
@@ -141,22 +135,27 @@ async function getStartPose(ex){
 	}
 }
 
-async function startExercise() {
+async function startExercise(ex) {
 	let count = 0;
-	let refPose = await getStartPose(ExerciseEnum.squats);
+	let refPose = await getStartPose(ex);
 	console.log(refPose);
 	let top = true;
 
 	let endTime = new Date();
-	endTime.setSeconds(endTime.getSeconds() + 120);
+	endTime.setSeconds(endTime.getSeconds() + 60);
 	// console.log(endTime);
 
 	console.log(count);
+
 	let countdown = setInterval(() => {
 		if(Date.now() < endTime){ 
-			half = trackReps(refPose, top);
+			let half;
+			if(ex == ExerciseEnum.squats){
+				half = squatReps(refPose, top);
+			}
 
 			if(half == true){
+				// console.log("hey");
 				top = !top;
 				if(top == true){
 					count += 1;
@@ -170,35 +169,40 @@ async function startExercise() {
 	}, 100);
 }
 
-function trackReps(refPose, top){
-	if(poses.length > 0 && poses[0].pose.score > 0.25){
+function squatReps(refPose, top){
+	if(poses.length > 0 && poses[0].pose.score > 0.50){
 		const curPose = poses[0].pose;
 
-		if(top){
-			let lDiff = refPose.leftKnee.y * 0.10;
-			let rDiff = refPose.rightKnee.y * 0.10;
-
-			//Assumes knees don't move vertically during reps
-			if(curPose.leftHip.y >= lDiff + refPose.leftKnee.y &&
-				 curPose.rightHip.y >= rDiff + refPose.rightKnee.y){
-				return true;
-			}
-			else{
-				return false;
+		if(Math.abs(curPose.rightAnkle.x - curPose.leftAnkle.x) >= Math.abs(refPose.rightShoulder.x - refPose.leftShoulder.x)){
+			if(top){
+				let lDiff = curPose.leftKnee.y * 0.10;
+				let rDiff = curPose.rightKnee.y * 0.10;
+	
+				//Assumes knees don't move vertically during reps
+				if(curPose.leftHip.y >= curPose.leftKnee.y - lDiff && curPose.rightHip.y >= curPose.rightKnee.y - rDiff){
+					return true;
+				}
+				else{
+					return false;
+				}
+			} else{
+				let lDiff = refPose.leftHip.y * 0.05;
+				let rDiff = refPose.rightHip.y * 0.05;
+	
+				if(curPose.leftHip.y <= lDiff + refPose.leftHip.y &&
+					 curPose.rightHip.y <= rDiff + refPose.rightHip.y){
+				 return true;
+			 }
+			 else{
+				 return false;
+			 }
 			}
 		} else{
-			let lDiff = refPose.leftHip.y * 0.05;
-			let rDiff = refPose.rightHip.y * 0.05;
-
-			if(curPose.leftHip.y <= lDiff + refPose.leftHip.y &&
-				 curPose.rightHip.y <= rDiff + refPose.rightHip.y){
-			 return true;
-		 }
-		 else{
-			 return false;
-		 }
+			console.log("Your feat are too close together.");
+			return false;
 		}
 	} else{
 		console.log("Error, cannot detect pose.");
+		return false;
 	}
 }
