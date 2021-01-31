@@ -1,5 +1,7 @@
 import React from 'react';
 import { Button, Image, StyleSheet, Text, View } from 'react-native';
+import {ExerciseEnum} from '../enum';
+
 
 const ExerciseScreen = ({navigation, route}) => {
   const {name, gif, info, id} = route.params;
@@ -14,10 +16,9 @@ const ExerciseScreen = ({navigation, route}) => {
       <View style={{height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
         <Button
           title="Try" 
-          onPress={() => navigation.navigate("Analysis", {name, id})}
+          onPress={() => navigation.navigate("Analysis", {name, id, ex: ExerciseEnum[name]})}
         />
       </View>
-      
     </View>
   );
 }
