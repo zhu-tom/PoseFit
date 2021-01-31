@@ -21,4 +21,4 @@ We ran into a lot of challenges during this project. For both of us, it was our 
 # Notes
 - The counter in the app now works as intended! There was a small bug during the demo video.
 - Raising you hand above your head starts the timer for the exercise (I am not crazy). 
-- Had we not run in to so much trouble initially developing the app we would have added more prompts/messages to the user interface, currently these messages display in the console while running the app.
+- Had we not run in to so much trouble initially developing the app we would have added more prompts/messages to the user interface, currently these messages display in the terminal while running the app.
