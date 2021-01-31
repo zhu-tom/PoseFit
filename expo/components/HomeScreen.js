@@ -8,12 +8,16 @@ const DATA = [
   {
     id: 1,
     name: "Squats",
-    img: "",
+    info: "Keep your feet shoulder-width apart",
+    img: "squat.jpg",
+    gif: "squat.gif"
   },
   {
     id: 2,
+    info: "",
     name: "Pushups",
-    img: ""
+    img: "pushup.png",
+    gif: "pushup.gif"
   }
 ];
 
@@ -46,7 +50,9 @@ const styles = StyleSheet.create({
   listItem: {
     display: 'flex',
     justifyContent: 'center',
-    height: 100,
+    alignItems: 'flex-start',
+    padding: 20,
+    height: 80,
   },
   separator: {
     height: 1,
