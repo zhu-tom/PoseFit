@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, View } from 'react-native';
+import { Button, Text, View } from 'react-native';
 import { auth } from '../firebase/firebase';
 
 const ProfileScreen = () => {
@@ -8,6 +8,7 @@ const ProfileScreen = () => {
     <View style={{padding: 20}}>
       <Text style={{fontSize: 24}}>Hello, {}</Text>
       <Text style={{fontSize: 16}}>Email {auth.currentUser.email}</Text>
+      <Button title="Log Out" onPress={() => auth.signOut()}/>
     </View>
   )
 }
