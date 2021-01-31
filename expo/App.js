@@ -34,21 +34,25 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import * as Permissions from 'expo-permissions';
 
 import WelcomeScreen from './components/WelcomeScreen';
-import { AuthContext, AuthProvider } from './firebase/context';
 import SignupScreen from './components/SignupScreen';
 import LoginScreen from './components/LoginScreen';
 import HomeTab from './components/HomeTab';
 import ProfileTab from './components/ProfileTab';
 
 import {Ionicons} from '@expo/vector-icons';
+import { auth } from './firebase/firebase';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
 const App = () => {
-  const { user } = useContext(AuthContext);
-  console.log(user);
-
+  const [user, setUser] = React.useState(null);
+  React.useEffect(() => {
+    auth.onAuthStateChanged(u => {
+      setUser(u);
+      console.log("authstatechange");
+    });
+  }, []);
   const [permission, askForPermission] = Permissions.usePermissions(Permissions.CAMERA, { ask: true});
 
   if (!permission || permission.status !== 'granted') {
@@ -60,12 +64,15 @@ const App = () => {
     );
   }
 
+  
+
+  console.log(user);
+
 
   return (
-    <AuthProvider>
       <SafeAreaView style={styles.container}>
           <NavigationContainer>
-            {user === null ? 
+            {user == null ? 
               (
                 <Stack.Navigator>
                   <Stack.Screen
@@ -105,7 +112,6 @@ const App = () => {
               )}  
           </NavigationContainer>
         </SafeAreaView>
-    </AuthProvider>
   );
 };
 
