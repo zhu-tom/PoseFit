@@ -4,11 +4,13 @@ import * as tf from '@tensorflow/tfjs';
 import * as posenet from '@tensorflow-models/posenet';
 import { cameraWithTensors } from '@tensorflow/tfjs-react-native';
 import { StyleSheet, View, Text, Button, Dimensions } from 'react-native';
+import { ExerciseEnum } from '../enum';
 
 const TensorCamera = cameraWithTensors(Camera);
 const scaleFactor = 0.50;
 const flipHorizontal = false;
 const outputStride = 16;
+// let mPose = null;
 
 const convertToMl5 = (data) => {
   data.keypoints.forEach(item => {
@@ -21,7 +23,116 @@ const convertToMl5 = (data) => {
   return data;
 }
 
-const AnalysisScreen = ({navigation}) => {
+const getStartPose = async (ex, images, net) => {
+	let ready = false;
+	let startPose;
+
+	if(ex == ExerciseEnum["Squats"]){
+		await new Promise((resolve, reject) => {
+		// 	let cntdn = setInterval(async () => { 
+			requestAnimationFrame(async function initLoop(){
+				const nextImageTensor = images.next().value;
+				nextImageTensor.height = nextImageTensor.shape[0];
+				// console.log(nextImageTensor.shape);
+				nextImageTensor.width = nextImageTensor.shape[1];
+				
+				const pose = await net.estimateSinglePose(nextImageTensor, scaleFactor, flipHorizontal, outputStride);
+				let mPose = convertToMl5(pose);
+				// console.log(mPose.nose);
+
+				if(mPose.score > 0.75 && mPose.keypoints.length == 17){
+					let curPose = mPose;
+					if(Math.abs(curPose.rightAnkle.x - curPose.leftAnkle.x) >= Math.abs(curPose.rightShoulder.x - curPose.leftShoulder.x)){
+						if(curPose.rightWrist.y < curPose.nose.y && curPose.score > 0.2){
+							ready = true;
+						}
+					} else{
+						console.log("Your feet must be shoulder width apart.");
+					}
+				} else{
+					console.log("Error, cannot detect pose.");
+				}
+
+				if(!ready)
+					requestAnimationFrame(initLoop);
+				else
+					resolve(true);
+			});
+			// }, 500);
+		});
+
+		console.log("Get ready, starting timer in...");
+		console.log(3);
+		let i = 0;
+		let promise = new Promise((resolve, reject) => {
+			let countdown = setInterval(async () => {
+				if(i < 2){
+					console.log(2-i);
+				} else{
+					console.log("GO!");
+					resolve(startPose);
+					clearInterval(countdown);
+				}
+	
+				if(i == 1){
+					requestAnimationFrame(async () => {
+						const nextImageTensor = images.next().value;
+						nextImageTensor.height = nextImageTensor.shape[0];
+						// console.log(nextImageTensor.shape);
+						nextImageTensor.width = nextImageTensor.shape[1];
+
+						let s = await net.estimateSinglePose(nextImageTensor, scaleFactor, flipHorizontal, outputStride);
+						startPose = convertToMl5(s);
+					});
+				}
+	
+				i += 1;
+			}, 1000);
+		})
+
+		return promise;
+	} else{
+		return null;
+	}
+}
+
+const squatReps = (refPose, curPose, top) => {
+	if(curPose.score > 0.75){
+		let diff = Math.abs(curPose.rightShoulder.x - curPose.leftShoulder.x) * 0.20;
+		if(Math.abs(curPose.rightAnkle.x - curPose.leftAnkle.x) >= Math.abs(curPose.rightShoulder.x - curPose.leftShoulder.x) - diff){
+			if(top){
+				let lDiff = curPose.leftKnee.y * 0.10;
+				let rDiff = curPose.rightKnee.y * 0.10;
+	
+				//Assumes knees don't move vertically during reps
+				if(curPose.leftHip.y >= curPose.leftKnee.y - lDiff && curPose.rightHip.y >= curPose.rightKnee.y - rDiff){
+					return true;
+				}
+				else{
+					return false;
+				}
+			} else{
+				let lDiff = refPose.leftHip.y * 0.05;
+				let rDiff = refPose.rightHip.y * 0.05;
+	
+				if(curPose.leftHip.y <= lDiff + refPose.leftHip.y && curPose.rightHip.y <= rDiff + refPose.rightHip.y){
+					return true;
+				}
+				else{
+					return false;
+				}
+			}
+		} else{
+			console.log("Your feet are too close together.");
+			return false;
+		}
+	} else{
+		console.log("Error, cannot detect pose.");
+		return false;
+	}
+}
+
+const AnalysisScreen = ({navigation, route}) => {
   const [tfReady, setTfReady] = React.useState(false);
   const [net, setNet] = React.useState(null);
 
@@ -38,29 +149,58 @@ const AnalysisScreen = ({navigation}) => {
       setNet(thenet);
     }
     waitForTf();
-  }, [])
+  }, []);
 
-  const handleCameraStream = (images, updatePreview, gl) => {
-    const loop = async () => {
+  const handleCameraStream = async (images, updatePreview, gl) => {
+    // const loop = async () => {
       if (tfReady && net !== null) {
-        const nextImageTensor = images.next().value;
-        nextImageTensor.height = nextImageTensor.shape[0];
-        console.log(nextImageTensor.shape);
-        nextImageTensor.width = nextImageTensor.shape[1];
-        
-        const pose = await net.estimateSinglePose(nextImageTensor, scaleFactor, flipHorizontal, outputStride);
-        //console.log(convertToMl5(pose));
-        //
-        // do something with tensor here
-        //
-  
-        // if autorender is false you need the following two lines.
-        // updatePreview();
-        // gl.endFrameEXP();
-        requestAnimationFrame(loop);
+				let ex = route.params.ex;
+				let count = 0;
+				let refPose = await getStartPose(ex, images, net);
+				// console.log(refPose);
+
+				let top = true;
+				let half;
+
+				let endTime = new Date();
+				endTime.setSeconds(endTime.getSeconds() + 60);
+				// console.log(endTime);
+
+				console.log(count);
+
+				requestAnimationFrame(async function countLoop(){
+					if(Date.now() < endTime){
+						const nextImageTensor = images.next().value;
+						nextImageTensor.height = nextImageTensor.shape[0];
+						// console.log(nextImageTensor.shape);
+						nextImageTensor.width = nextImageTensor.shape[1];
+				
+						let c = await net.estimateSinglePose(nextImageTensor, scaleFactor, flipHorizontal, outputStride);
+						const curPose = convertToMl5(c);
+					// let countdown = setInterval(async () => { 
+						if(ex == ExerciseEnum["Squats"]){
+							half = squatReps(refPose, curPose, top);
+						}
+
+						if(half == true){
+							// console.log("hey");
+							top = !top;
+							if(top == true){
+								count += 1;
+								console.log(count);
+							}
+						}
+
+						requestAnimationFrame(countLoop);
+					} else{ 
+						console.log("Times up!");
+						// clearInterval(countdown);
+					} 
+				// }, 500);
+				});
       }
-    }
-    loop();
+    // }
+    // loop();
   }
 
 
