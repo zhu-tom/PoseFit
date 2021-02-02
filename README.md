@@ -6,6 +6,8 @@ PoseFit aims to bridge the gap between gym and home workouts. Our mobile app, bu
 
 # To Run
 - Clone the git repo to your local computer
+- Run "npm install" in the expo directory
+- Rename expo/node_modules/expo-crypto to expo/node_modules/crypto
 - Run "npm start" in the expo directory
 - Download the Expo Go application on your mobile phone
 - Using your phone's camera, scan the QR Code displayed in the terminal window
